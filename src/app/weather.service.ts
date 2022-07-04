@@ -1,0 +1,30 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, debounceTime, Observable, pipe, Subject } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { Weather } from './weather';
+@Injectable({
+  providedIn: 'root'
+})
+export class WeatherService {
+
+  private subject = new BehaviorSubject<any>([]);
+
+  constructor(private http: HttpClient) { }
+  getWeather(city: string): Observable<Weather>{
+    const options = new HttpParams()
+    .set('units', 'metric')
+    .set('q', city)
+    .set('appId', environment.apiKey);
+    return this.http.get<Weather>(environment.apiUrl + 'weather', {params: options})
+  }
+
+  search(city: string){
+    this.getWeather(city).subscribe(res => { this.subject.next(res) })
+    }
+
+  getWeathers(): Observable<any>{
+    return this.subject.asObservable()
+    }
+  
+}
